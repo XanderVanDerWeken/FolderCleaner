@@ -1,6 +1,11 @@
 package cmd
 
 import (
+	"bufio"
+	"fmt"
+	"os"
+	"strings"
+
 	"github.com/spf13/cobra"
 	"github.com/xandervanderweken/FolderCleaner/internal/services"
 )
@@ -14,16 +19,47 @@ var cleanCmd = &cobra.Command{
 
 		var extensions = extensionService.GetExtensions(template)
 
-		if isDryRun {
-			fileService.ListFiles(path, extensions)
-		} else {
-			fileService.DeleteFiles(path, extensions)
+		var filesToDelete, err = fileService.ListFiles(path, extensions)
+
+		if err != nil {
+			fmt.Printf("Error cleaning folder: %v\n", err)
+			return
 		}
+
+		if len(filesToDelete) == 0 {
+			fmt.Println("No matching files found to delete")
+			return
+		}
+
+		fmt.Println("Files that would be deleted")
+		for _, file := range filesToDelete {
+			fmt.Println(" -", file)
+		}
+
+		if !isForcing {
+			fmt.Print("Do you want to delte those files (y/N): ")
+			scanner := bufio.NewScanner(os.Stdin)
+			scanner.Scan()
+			input := strings.ToLower(strings.TrimSpace(scanner.Text()))
+			if input != "y" {
+				fmt.Println("Deletion canceled")
+				return
+			}
+		}
+
+		for _, file := range filesToDelete {
+			fmt.Printf("Deleting %s\n", file)
+			if err := fileService.DeleteFile(file); err != nil {
+				fmt.Printf("Failed to delete %s: %v\n", file, err)
+			}
+		}
+
+		fmt.Println("Cleaning Complete!")
 	},
 }
 
 var path string
-var isDryRun bool
+var isForcing bool
 var template string
 
 func init() {
@@ -33,7 +69,7 @@ func init() {
 	cleanCmd.MarkFlagDirname("path")
 	cleanCmd.MarkFlagRequired("path")
 
-	cleanCmd.Flags().BoolVarP(&isDryRun, "dry", "d", false, "Should not delete - Running without deleting")
+	cleanCmd.Flags().BoolVarP(&isForcing, "force", "f", false, "Should delete files, without asking")
 
 	cleanCmd.Flags().StringVarP(&template, "template", "t", "", "Template to use (latex, ...)")
 }
