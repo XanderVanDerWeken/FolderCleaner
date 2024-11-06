@@ -13,9 +13,12 @@ import (
 var cleanCmd = &cobra.Command{
 	Use:   "clean",
 	Short: "Clean specified files from a folder",
+	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		fileService := services.NewFileService()
 		extensionService := services.NewExtensionService()
+
+		var path = args[0]
 
 		var extensions = extensionService.GetExtensions(template)
 
@@ -58,16 +61,11 @@ var cleanCmd = &cobra.Command{
 	},
 }
 
-var path string
 var isForcing bool
 var template string
 
 func init() {
 	rootCmd.AddCommand(cleanCmd)
-
-	cleanCmd.Flags().StringVarP(&path, "path", "p", "", "Path of folder")
-	cleanCmd.MarkFlagDirname("path")
-	cleanCmd.MarkFlagRequired("path")
 
 	cleanCmd.Flags().BoolVarP(&isForcing, "force", "f", false, "Should delete files, without asking")
 
