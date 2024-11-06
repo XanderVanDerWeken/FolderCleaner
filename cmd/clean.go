@@ -22,6 +22,13 @@ var cleanCmd = &cobra.Command{
 
 		var extensions = extensionService.GetExtensions(template)
 
+		if len(extensions) == 0 {
+			fmt.Printf("No Template was found for: %s\n", template)
+			return
+		} else {
+			fmt.Printf("Using template: %s\n", template)
+		}
+
 		var filesToDelete, err = fileService.ListFiles(path, extensions)
 
 		if err != nil {

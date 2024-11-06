@@ -37,7 +37,7 @@ func (e extensionService) GetExtensions(extensionName string) []string {
 	switch strings.ToLower(extensionName) {
 	case "latex":
 		return latexExtensions
-	case "macos":
+	case "macos", "mac":
 		return macExtensions
 	case "intellij":
 		return intellij
