@@ -1,5 +1,7 @@
 package services
 
+import "strings"
+
 type ExtensionService interface {
 	GetExtensions(extensionName string) []string
 }
@@ -11,7 +13,7 @@ func NewExtensionService() ExtensionService {
 	return &extensionService{}
 }
 
-var latexExtensions []string = []string{
+var latexExtensions = []string{
 	".aux",
 	".log",
 	".nav",
@@ -19,12 +21,26 @@ var latexExtensions []string = []string{
 	".snm",
 	".synctex.gz",
 	".toc",
+	".vrb",
+}
+
+var macExtensions = []string{
+	".DS_Store",
+}
+
+var intellij = []string{
+	".idea",
+	".target",
 }
 
 func (e extensionService) GetExtensions(extensionName string) []string {
-	switch extensionName {
+	switch strings.ToLower(extensionName) {
 	case "latex":
 		return latexExtensions
+	case "macos":
+		return macExtensions
+	case "intellij":
+		return intellij
 	default:
 		return []string{}
 	}
